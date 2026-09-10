@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
+const n8nWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
+
 const questions = [
   ['polyuria', 'Do you urinate unusually frequently?', 'Increased urination'],
   ['polydipsia', 'Do you experience excessive thirst?', 'Excessive thirst'],
@@ -40,17 +42,19 @@ function App() {
 
     setError('');
 
+    if (!n8nWebhookUrl) {
+      setError('The n8n webhook URL is not configured.');
+      return;
+    }
+
     try {
-      const response = await fetch(
-        'https://alokn8n01.app.n8n.cloud/webhook-test/diabetes-risk',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const response = await fetch(n8nWebhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
 
       if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
